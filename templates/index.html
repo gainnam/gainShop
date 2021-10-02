@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- favicon -->
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous"></script>
+
+    <title>쇼핑몰 판매 페이지</title>
+
+    <meta property="og:title" content="One Page Shop" />
+    <meta property="og:description" content="lip gloss!" />
+    <meta property="og:image" content="{{ url_for('static', filename='ogImage.jpg') }}" />
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR&display=swap" rel="stylesheet">
+    <script>
+        $(document).ready(function () {
+            $('#rate').empty();
+            $.ajax({
+                type: "GET",
+                url: "https://api.manana.kr/exchange/rate.json",
+                data: {},
+                success: function (response) {
+                    let rate = response[1]['rate']
+                    $('#rate').text("달러-원 환율: " + rate);
+                }
+            })
+            showOrder();
+        });
+
+        function makeOrder() {
+            let name = $('#name').val()
+            let quantity = $('#quantity').val()
+            let adres = $('#adres').val()
+            let number = $('#number').val()
+            $.ajax({
+                type: "POST",
+                url: "/order",
+                data: {
+                    name_give: name, quantity_give: quantity, adres_give: adres, number_give: number
+                },
+                success: function (response) {
+                    alert(response["msg"]);
+                    window.location.reload();
+                }
+            })
+        }
+
+        function showOrder() {
+            $.ajax({
+                type: "GET",
+                url: "/order",
+                data: {},
+                success: function (response) {
+                    let orderList = response['all_orders']
+                    for (let i = 0; i < orderList.length; i++) {
+                        let name = orderList[i]['name']
+                        let quantity = orderList[i]['quantity']
+                        let adres = orderList[i]['adres']
+                        let number = orderList[i]['number']
+
+                        let temp_html = `<tr>
+                                            <th scope="row">${name}</th>
+                                            <td>${quantity}</td>
+                                            <td>${adres}</td>
+                                            <td>${number}</td>
+                                        </tr>`
+                        $('#reviews-box').append(temp_html)
+
+                    }
+                }
+            })
+        }
+
+
+    </script>
+    <style>
+        * {
+            font-family: 'Noto Serif KR', serif;
+        }
+
+        .wrap {
+
+            width: 500px;
+            margin: 30px auto 0px auto;
+        }
+
+        .main_image {
+            width: 500px;
+            height: 400px;
+            margin: 15px auto 10px auto;
+
+            background-image: url("https://64.media.tumblr.com/899d686863938cd7efbf486fa28bffd4/24ea4c3d5337df24-75/s1280x1920/d0b4909670c636fcb86937dbcce472a5dfa4950d.jpg");
+            background-size: cover;
+            background-position: center;
+        }
+
+        .cost {
+            font-size: 20px;
+        }
+
+        .input_order {
+            width: 500px;
+        }
+
+        .btn-outline-secondary {
+            /*border: none;*/
+        }
+
+        .btn_order {
+            display: block;
+            width: 200px;
+            margin: auto;
+        }
+
+        .rate {
+            color: darkblue;
+        }
+
+        .order-table {
+            margin-top: 50px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="wrap">
+    <div class="main_image">
+    </div>
+    <h1>립글로즈 <span class="cost">   가격: 20,000원 / 개</span></h1>
+    <p>이 립글로즈는 다양한 색의 영롱한 글리터가 포함되어 있어 고급진 표현을 해주고, 플럼핑 효과가 있어 바르면 탱글탱글한 립을 연출하실 수 있습니다.
+        자체의 색이 없어 다른 립제품 위에 발라 다양한 연출을 하기에 좋습니다.</p>
+    <p id="rate" class="rate"></p>
+    <div class="input_order">
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <button class="btn btn-outline-secondary" type="button">주문자 성함</button>
+            </div>
+            <input id="name" type="text" class="form-control" placeholder="" aria-label=""
+                   aria-describedby="basic-addon1">
+        </div>
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <button class="btn btn-outline-secondary" type="button">수량</button>
+            </div>
+            <select id="quantity" class="custom-select" id="inputGroupSelect03">
+                <option selected></option>
+                <option value="1">1개</option>
+                <option value="2">2개(+18,000원 -개당 19,000원)</option>
+                <option value="3">3개(+24,000원 -개당 18,000원)</option>
+            </select>
+        </div>
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <button class="btn btn-outline-secondary" type="button">주소</button>
+            </div>
+            <input id="adres" type="text" class="form-control" placeholder="" aria-label=""
+                   aria-describedby="basic-addon1">
+        </div>
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <button class="btn btn-outline-secondary" type="button">전화번호</button>
+            </div>
+            <input id="number" type="text" class="form-control" placeholder="" aria-label=""
+                   aria-describedby="basic-addon1">
+        </div>
+    </div>
+    <button onclick="makeOrder()" type="button" class="btn_order btn btn-primary" id="order-button">주문하기</button>
+    <div class="order-table">
+        <table id="reviews-box" class="table table-borderless">
+            <thead>
+            <tr>
+                <th scope="col">name</th>
+                <th scope="col">quantity</th>
+                <th scope="col">address</th>
+                <th scope="col">number</th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</body>
+
+</html>
